@@ -1607,7 +1607,7 @@ function sha256hex(str) {
 }
 
 let HC_UNLOCKED = false;
-try { HC_UNLOCKED = sessionStorage.getItem("hcUnlocked") === "1"; } catch (e) {}
+try { sessionStorage.removeItem("hcUnlocked"); } catch (e) {}
 const hcSet = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
 function hcLabels() {
   hcSet("hcKeyTitle", hcT("keyTitle")); hcSet("hcKeySub", hcT("keySub")); hcSet("hcKeyOk", hcT("ok")); hcSet("hcKeyCancel", hcT("cancel"));
@@ -1618,7 +1618,6 @@ function hcLabels() {
 function hcEnter() { document.getElementById("hcGo").click(); }
 function hcCloseKey() { document.getElementById("hcKeyModal").hidden = true; }
 document.querySelectorAll('.mode-btn[data-mode="hard"]').forEach(b => b.addEventListener("click", () => {
-  if (HC_UNLOCKED) return hcEnter();
   hcLabels();
   const i = document.getElementById("hcKeyInput");
   document.getElementById("hcKeyErr").textContent = ""; i.value = ""; document.getElementById("hcKeyModal").hidden = false; setTimeout(() => i.focus(), 50);
@@ -1628,7 +1627,6 @@ document.getElementById("hcKeyForm").addEventListener("submit", ev => {
   ev.preventDefault();
   const v = document.getElementById("hcKeyInput").value.trim();
   if (v && HC_KEY_HASHES.includes(sha256hex(v))) {
-    HC_UNLOCKED = true; try { sessionStorage.setItem("hcUnlocked", "1"); } catch (e) {}
     hcCloseKey(); hcEnter();
   } else document.getElementById("hcKeyErr").textContent = hcT("bad");
 });
