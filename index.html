@@ -2024,6 +2024,7 @@ async function run(file) {
 // 8) واجهة الدخول: خطوات + اختيار الهاتف + حركات
 // ======================================================================
 const IPHONES = [
+  ["iPhone 18", ["iPhone 18 Pro Max", "iPhone 18 Pro", "iPhone Duo", "iPhone 18"]],
   ["iPhone 17", ["iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone Air", "iPhone 17"]],
   ["iPhone 16", ["iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 16 Plus", "iPhone 16", "iPhone 16e"]],
   ["iPhone 15", ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15 Plus", "iPhone 15"]],
@@ -2078,6 +2079,7 @@ const IPHONES = [
   const iosVersion = $("iosVersion"), iosWrap = $("iosWrap");
   // [آخر iOS مدعوم, أول iOS عند الإطلاق, نص الإصدار الدقيق اختياري]
   const IOS_RANGE = {
+    "iPhone 18 Pro Max":[27,27],"iPhone 18 Pro":[27,27],"iPhone Duo":[27,27],"iPhone 18":[27,27],
     "iPhone 17 Pro Max":[26,26],"iPhone 17 Pro":[26,26],"iPhone Air":[26,26],"iPhone 17":[26,26],
     "iPhone 16 Pro Max":[26,18],"iPhone 16 Pro":[26,18],"iPhone 16 Plus":[26,18],"iPhone 16":[26,18],"iPhone 16e":[26,18],
     "iPhone 15 Pro Max":[26,17],"iPhone 15 Pro":[26,17],"iPhone 15 Plus":[26,17],"iPhone 15":[26,17],
@@ -2096,10 +2098,17 @@ const IPHONES = [
   };
   function iosOptionsFor(model) {
     const r = IOS_RANGE[model] || [26, 12];
-    const out = [];
-    for (let v = r[0]; v >= r[1]; v--) {
-      if (v === r[0] && r[2]) out.push(["iOS " + r[2], "iOS " + r[2] + " " + tr("(آخر إصدار)")]);
-      else out.push(["iOS " + v, "iOS " + v + (v === r[0] ? " " + tr("(آخر إصدار)") : "")]);
+    const out = [], latest = " " + tr("(آخر إصدار)");
+    if (r[0] >= 26) {                        // iOS 27 مع كل الإصدارات الفرعية (27.x و 27.x.y)
+      for (let m = 9; m >= 0; m--) for (let pch = 2; pch >= 0; pch--) {
+        const v = "27" + (m || pch ? "." + m : "") + (pch ? "." + pch : "");
+        out.push(["iOS " + v, "iOS " + v]);
+      }
+    }
+    const top = r[0] >= 27 ? 26 : r[0];
+    for (let v = top; v >= r[1] && v <= top; v--) {
+      if (v === r[0] && r[2]) out.push(["iOS " + r[2], "iOS " + r[2] + latest]);
+      else out.push(["iOS " + v, "iOS " + v + (!out.length && v === r[0] ? latest : "")]);
     }
     return out;
   }
