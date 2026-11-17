@@ -1564,7 +1564,8 @@ const sectionSelect = document.getElementById("sectionSelect");
 // المفتاح الافتراضي الحالي: VOLCANO-2026  (غيّره قبل النشر)
 const HC_KEY_HASHES = ["158f0f0729274357d251520cd36699e9d0f31ee83ba1b1bfb34472f1667ed1f1"];
 const HC_BUNDLE_ID = "com.apple.mobile.MobileHouseArrest";
-const HC_DEFAULT_SCHEME = "filza://";   // الـ URL scheme لا يتغير حتى لو غُيّر اسم/أيقونة التطبيق
+// روابط التطبيقات التي يجرّبها الزر بالترتيب (الـ scheme لا يتغير حتى لو تغيّر الاسم/الأيقونة). أضف هنا scheme تطبيق 3105 عند معرفته.
+const HC_SCHEMES = ["filza://", "3105://"];
 const HC_T = {
   ar: { keyTitle:"🔑 Hard Check", keySub:"أدخل المفتاح للمتابعة", keyPh:"المفتاح", ok:"دخول", cancel:"إلغاء", bad:"المفتاح غير صحيح",
         card1:"فتح التطبيق", logs:"حالة السجلات", found:"ظهر في السجلات — آخر ظهور:", notfound:"لم يظهر في السجلات",
@@ -1644,13 +1645,10 @@ function hcRender() {
     logHtml = ha ? `<span class="crit">${esc(hcT("found"))} ${esc(fmt(Math.max(ha.first || 0, ha.lastInst || 0, ha.lastDel || 0)))}</span>`
                  : `<span class="ok">${esc(hcT("notfound"))}</span>`;
   }
-  let sch = HC_DEFAULT_SCHEME; try { sch = localStorage.getItem("hcScheme") || sch; } catch (e) {}
   el.innerHTML = `<div class="hc-card"><h2>1) ${esc(hcT("card1"))}</h2>
     <div class="muted">${esc(hcT("logs"))}:</div>
     <code class="hc-bid" id="hcBid">${esc(HC_BUNDLE_ID)}</code>
     <div>${logHtml}</div>
-    <div class="muted" style="margin-top:10px">${esc(hcT("scheme"))}:</div>
-    <input class="hc-input" id="hcScheme" value="${esc(sch)}" style="text-align:left;letter-spacing:0;margin-top:4px">
     <div class="hc-row">
       <button type="button" class="hc-btn sec2" id="hcCopy">${esc(hcT("copy"))}</button>
       <button type="button" class="hc-btn main" id="hcOpen">${esc(hcT("openBtn"))}</button>
@@ -1664,17 +1662,20 @@ function hcRender() {
   document.getElementById("hcOpen").addEventListener("click", hcOpenApp);
 }
 function hcOpenApp() {
-  const url = (document.getElementById("hcScheme").value || HC_DEFAULT_SCHEME).trim();
-  try { localStorage.setItem("hcScheme", url); } catch (e) {}
-  const res = document.getElementById("hcResult"); let opened = false;
+  const res = document.getElementById("hcResult"); let opened = false, i = 0;
   const onHide = () => { if (document.hidden || document.visibilityState === "hidden") opened = true; };
   document.addEventListener("visibilitychange", onHide); window.addEventListener("pagehide", onHide); window.addEventListener("blur", onHide);
   res.className = "hc-result muted"; res.textContent = hcT("trying");
-  setTimeout(() => { window.location.href = url; }, 50);
-  setTimeout(() => {
+  const finish = () => {
     document.removeEventListener("visibilitychange", onHide); window.removeEventListener("pagehide", onHide); window.removeEventListener("blur", onHide);
     res.className = "hc-result " + (opened ? "ok" : "crit"); res.textContent = hcT(opened ? "opened" : "failed");
-  }, 2000);
+  };
+  const next = () => {
+    if (opened || i >= HC_SCHEMES.length) return finish();
+    window.location.href = HC_SCHEMES[i++];
+    setTimeout(next, 1800);
+  };
+  next();
 }
 window.__hcRefresh = () => { hcLabels(); if (!document.getElementById("sec-hardcheck").classList.contains("hidden")) hcRender(); };
 if (sectionSelect) sectionSelect.addEventListener("change", () => {
