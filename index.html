@@ -1568,29 +1568,29 @@ const HC_BUNDLE_ID = "com.apple.mobile.MobileHouseArrest";
 const HC_SCHEMES = ["threeoneosfive://", "filza://"];
 const HC_T = {
   ar: { keyTitle:"🔑 Hard Check", keySub:"أدخل المفتاح للمتابعة", keyPh:"المفتاح", ok:"دخول", cancel:"إلغاء", bad:"المفتاح غير صحيح",
-        card1:"فتح التطبيق", logs:"حالة السجلات", found:"ظهر في السجلات — آخر ظهور:", notfound:"لم يظهر في السجلات",
+        card1:"فتح تطبيق الغش (Open cheat app)", logs:"حالة السجلات", found:"ظهر في السجلات — آخر ظهور:", notfound:"لم يظهر في السجلات",
         nolog:"ارفع ملف السجلات أولاً لعرض الحالة", openBtn:"📲 فتح التطبيق", scheme:"رابط التطبيق (URL scheme)",
         copy:"نسخ", copied:"تم النسخ ✓", trying:"جارٍ محاولة فتح التطبيق…", opened:"✅ تم فتح التطبيق (التطبيق موجود)",
         failed:"❌ لم يُفتح — التطبيق غير موجود أو له scheme مختلف",
-        note:"ملاحظة: المتصفح لا يستطيع فتح تطبيق بالـ bundle id مباشرةً، لذلك يُفتح عبر الـ URL scheme الخاص بالتطبيق (ثابت حتى لو تغيّر اسمه وأيقونته)." },
+        note:"يفتح التطبيق عبر رابطه الخاص، ويعمل حتى لو غُيّر اسمه وأيقونته." },
   en: { keyTitle:"🔑 Hard Check", keySub:"Enter the key to continue", keyPh:"Key", ok:"Enter", cancel:"Cancel", bad:"Invalid key",
-        card1:"Open app", logs:"Log status", found:"Found in logs — last seen:", notfound:"Not found in logs",
+        card1:"Open cheat app", logs:"Log status", found:"Found in logs — last seen:", notfound:"Not found in logs",
         nolog:"Upload the logs file first to see the status", openBtn:"📲 Open app", scheme:"App link (URL scheme)",
         copy:"Copy", copied:"Copied ✓", trying:"Trying to open the app…", opened:"✅ App opened (it exists)",
         failed:"❌ Did not open — app missing or uses a different scheme",
-        note:"Note: a web page cannot launch an app by bundle id directly, so it opens through the app's URL scheme (unchanged even if the app is renamed or re-iconed)." },
+        note:"Opens the app through its own link; works even if it was renamed or re-iconed." },
   fr: { keyTitle:"🔑 Hard Check", keySub:"Entrez la clé pour continuer", keyPh:"Clé", ok:"Entrer", cancel:"Annuler", bad:"Clé invalide",
-        card1:"Ouvrir l'app", logs:"État des logs", found:"Trouvé dans les logs — dernière vue :", notfound:"Absent des logs",
+        card1:"Ouvrir l'app de triche", logs:"État des logs", found:"Trouvé dans les logs — dernière vue :", notfound:"Absent des logs",
         nolog:"Chargez d'abord le fichier de logs", openBtn:"📲 Ouvrir l'app", scheme:"Lien de l'app (URL scheme)",
         copy:"Copier", copied:"Copié ✓", trying:"Tentative d'ouverture…", opened:"✅ App ouverte (elle existe)",
         failed:"❌ Non ouverte — app absente ou scheme différent",
-        note:"Note : une page web ne peut pas ouvrir une app par bundle id ; elle s'ouvre via son URL scheme (inchangé même si renommée)." },
+        note:"Ouvre l'app via son propre lien, même si elle a été renommée." },
   pt: { keyTitle:"🔑 Hard Check", keySub:"Digite a chave para continuar", keyPh:"Chave", ok:"Entrar", cancel:"Cancelar", bad:"Chave inválida",
-        card1:"Abrir app", logs:"Estado dos logs", found:"Encontrado nos logs — último:", notfound:"Não encontrado nos logs",
+        card1:"Abrir app de trapaça", logs:"Estado dos logs", found:"Encontrado nos logs — último:", notfound:"Não encontrado nos logs",
         nolog:"Envie primeiro o arquivo de logs", openBtn:"📲 Abrir app", scheme:"Link do app (URL scheme)",
         copy:"Copiar", copied:"Copiado ✓", trying:"Tentando abrir o app…", opened:"✅ App aberto (existe)",
         failed:"❌ Não abriu — app ausente ou scheme diferente",
-        note:"Nota: uma página web não abre app por bundle id; abre pelo URL scheme (igual mesmo se renomeado)." }
+        note:"Abre o app pelo próprio link, mesmo se renomeado." }
 };
 const hcT = k => (HC_T[CUR] || HC_T.en)[k];
 function sha256hex(str) {
@@ -1647,18 +1647,12 @@ function hcRender() {
   }
   el.innerHTML = `<div class="hc-card"><h2>1) ${esc(hcT("card1"))}</h2>
     <div class="muted">${esc(hcT("logs"))}:</div>
-    <code class="hc-bid" id="hcBid">${esc(HC_BUNDLE_ID)}</code>
     <div>${logHtml}</div>
     <div class="hc-row">
-      <button type="button" class="hc-btn sec2" id="hcCopy">${esc(hcT("copy"))}</button>
       <button type="button" class="hc-btn main" id="hcOpen">${esc(hcT("openBtn"))}</button>
     </div>
     <div class="hc-result" id="hcResult"></div>
     <div class="muted" style="margin-top:8px">${esc(hcT("note"))}</div></div>`;
-  document.getElementById("hcCopy").addEventListener("click", () => {
-    const b = document.getElementById("hcCopy"), done = () => { b.textContent = hcT("copied"); setTimeout(() => b.textContent = hcT("copy"), 1500); };
-    try { navigator.clipboard.writeText(HC_BUNDLE_ID).then(done, done); } catch (e) { done(); }
-  });
   document.getElementById("hcOpen").addEventListener("click", hcOpenApp);
 }
 function hcOpenApp() {
